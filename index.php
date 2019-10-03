@@ -4,14 +4,12 @@ ini_set('log_errors','on'); // ログを取るか
 ini_set('error_log','php_error.log'); //ログファイルの出力先
 session_start();
 
-// $debug_flg = true;
-// function debug($str){
-//   global $debug_flg;
-//   if($debug_flg){
-//     if(true){
-//     error_log('deb:' . $str);
-//   }
-// }
+$debug_flg = true;
+function debug($str){
+  global $debug_flg;
+  if($debug_flg) error_log($str);
+}
+
 //定型文(セリフ)
 define('MSG01', 'のクリティカルヒット！！');
 define('MSG02','ポイントのダメージ！！');
@@ -22,7 +20,13 @@ define('MSG06','...');
 define('MSG07','はうっ！');
 define('MSG08','の魔法攻撃！！');
 define('MSG09','が現れた！！');
-define('MSG10','初期化します。');
+define('MSG10','リスタート');
+define('MSG11', 'ゲームスタート！！');
+define('MSG12','の攻撃！');
+define('MSG13','を撃破！');
+define('MSG14', '逃げた！');
+
+
 
 // エネミー格納用
 $Monster = array();
@@ -59,7 +63,7 @@ abstract class Creature{
             //10%でクリティカル攻撃(1.5倍ダメージ)
             // $attackPoint = $attackPoint * 1.5;
             // $attackPoint = (int)$attackPoint;
-            $attackPoint = int($attackPoint * 1.5);
+            $attackPoint = (int)($attackPoint * 1.5);
             History::set($this->getName() . MSG01);
         }
         $targetObj->setHp($targetObj->getHp() - $attackPoint);
@@ -103,8 +107,8 @@ class Monster extends Creature{
         $this->name = $name;
         $this->hp = $hp;
         $this->img = $img;
-        $this->attackMin;
-        $this->attackMax;
+        $this->attackMin = $attackMin;
+        $this->attackMax = $attackMax;
     }
     public function getImg(){
         return $this->img;
@@ -132,7 +136,7 @@ class MagicMonster extends Monster{
             $targetObj->setHp( $targetObj->getHp() - $this->magicAttack);
             History::set($this->magicAttack.MSG02);
         }else{
-            parend::attack($targetObj);
+            parent::attack($targetObj);
         }
     }
 }
@@ -143,17 +147,19 @@ class MagicMonster extends Monster{
 // 履歴管理クラス
 // class History implements HistoryInterface{
 class History{
-    public function set($str){
+    public static function set($str){
         if(empty($_SESSION['history'])) $_SESSION['history'] = '';
         $_SESSION['history'] .= $str .'<br>';
     }
-    public function clear(){
+    public static function clear(){
         unset($_SESSION['history']);
     }
 }
 
 // インスタンス生成
-$human = new Human('村人',Gender::MAN,500,40,120);
+$humans[] = new Human('村人',Gender::MAN,100,40,120);
+$humans[] = new Human('勇者',Gender::WOMAN,1000,100,300);
+
 $monsters[] = new Monster('フランケン',100,'img/monster01.png',20,40);
 $monsters[] = new MagicMonster('フランケンNEO',200,'img/monster02.png',20,40,mt_rand(50,100));
 $monsters[] = new Monster('ドラキュリー',100,'img/monster03.png',20,40);
@@ -162,28 +168,89 @@ $monsters[] = new Monster('スカルフェイス',100,'img/monster05.png',20,40)
 $monsters[] = new Monster('毒ハンド',100,'img/monster06.png',20,40);
 $monsters[] = new Monster('沼ハンド',100,'img/monster07.png',20,40);
 $monsters[] = new Monster('血のハンド',100,'img/monster08.png',20,40);
+// debug('モンスター一覧');
+// debug(print_r($monsters,true));
 
 function createMonster(){
     global $monsters;
-    $monster = $monsters[mt_rand(0,7)];
-    History::set($monster->getName().MSG09);
+    // $monster = $monsters[mt_rand(0,7)];
+    // $_SESSION['monster'] = $monster;
+    // History::set($monster->getName().MSG09);
+
+    $_SESSION['monster'] = $monsters[mt_rand(0,7)];
+    History::set($_SESSION['monster']->getName().MSG09);
+
 }
 function createHuman(){
-    global $human;
-    $_SESSION['human'] = $human;
+    global $humans;
+    $_SESSION['human'] = $humans[mt_rand(0,1)];
 }
 
 function init(){
     History::clear();
     History::set(MSG10);
-    $_SESSION[’knockDownCount’] = 0;
+    $_SESSION['knockDownCount'] = 0;
     createHuman();
     createMonster();
 }
 function gameOver(){
+    $_POST = array();
     $_SESSION = array();
 }
 
+//POST送信
+if(!empty($_POST)){
+    debug('POST送信開始');
+    $attackFlg = (!empty($_POST['attack'])) ? true : false;
+    $startFlg = (!empty($_POST['start'])) ? true : false;
+    $escapeFlg = (!empty($_POST['escape'])) ? true : false;
+    debug('ーーーーーーーーーーーーーーーーーーーー');
+    debug('atatckFlg:'.$attackFlg);
+    debug('startFlg:'.$startFlg);
+    debug('escapeFlg:'.$escapeFlg);
+    debug('POST送信');
+    debug(print_r($_POST,true));
+    debug('セッション情報を表示');
+    debug(print_r($_SESSION,true));
+    debug('ーーーーーーーーーーーーーーーーーーーー');
+
+
+    if($startFlg){
+        //ゲームスタート又はリセット
+        History::set(MSG11);
+        init();
+        // debug('セッション情報を表示');
+        // debug(print_r($_SESSION,true));
+    }else if($attackFlg){
+        //攻撃するを選択した場合
+
+        //プレイヤー側の攻撃
+        History::set($_SESSION['human']->getName().MSG12);
+        $_SESSION['human']->attack($_SESSION['monster']);
+        $_SESSION['monster']->sayCry();
+
+        //モンスターの攻撃
+        History::set($_SESSION['monster']->getName().MSG12);
+        $_SESSION['monster']->attack($_SESSION['human']);
+        $_SESSION['human']->sayCry();
+        
+        //モンスター側のHPが0以下なら、次のモンスターをリスポーン
+        if($_SESSION['monster']->getHp() <= 0) {
+            History::set($_SESSION['monster']->getName().MSG13);
+            createMonster();
+            ++$_SESSION['knockDownCount'];
+        }
+        //プレイヤー側のHPが0以下でゲームオーバー
+        if($_SESSION['human']->getHp() <= 0) gameOver();
+
+    }else if($escape){
+        //逃げた場合
+        History::set(MSG14);
+        createMonster();
+    }
+
+    $_POST = array();
+}
 
 
 ?>
@@ -195,8 +262,8 @@ function gameOver(){
     <title>Objective</title>
     <style>
     	body{
-	    	margin: 0 auto;
-	    	padding: 150px;
+	    	margin: 50px auto;
+	    	padding: 0 150px;
 	    	width: 25%;
 	    	background: #fbfbfa;
         color: white;
@@ -248,7 +315,7 @@ function gameOver(){
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; color:#333; ">ゲーム「ドラ◯エ!!」</h1>
+    <h1 style="text-align:center; color:#333; ">ドラ◯エのパクリ!!」</h1>
     <div style="background:black; padding:15px; position: relative;">
        <?php if(empty($_SESSION)){ ?>
         <h2 style="margin-top:60px">GAME START ?</h2>
@@ -256,13 +323,13 @@ function gameOver(){
             <input type="submit" name="start" value="▶︎はじめる">
         </form>
        <?php }else{ ?>
-        <h2><?php echo $_SESSION['monster']->getImg().MSG09; ?></h2>
+        <h2><?php echo $_SESSION['monster']->getName().MSG09; ?></h2>
         <div style="height: 150px; ">
             <img src="<?php echo $_SESSION['monster']->getImg(); ?>" style="width:120px; height:auto; margin:40px auto 0 auto; display:block;">
         </div>
         <p style="font-size:14px; text-align:center;">モンスターのHP：<?php echo $_SESSION['monster']->getHp(); ?></p>
         <p>倒したモンスターの数：<?php echo $_SESSION['knockDownCount']; ?></p>
-        <p>勇者の残りHP：<?php echo $_SESSION['human']->getHp(); ?></p>
+        <p><?php echo $_SESSION['human']->getName(); ?>の残りHP：<?php echo $_SESSION['human']->getHp(); ?></p>
         <form action="" method="post">
             <input type="submit" name="attack" value="▶︎攻撃する">
             <input type="submit" name="escape" value="▶︎逃げる">
