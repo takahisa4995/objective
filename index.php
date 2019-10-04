@@ -1,26 +1,63 @@
 <?php
 
-require 'function.php'; //関数
-require 'message.php'; //定型文
 require 'dqClass.php'; //クラスファイル
+require 'instance.php'; //インスタンス生成
+require 'message.php'; //定型文
+require 'function.php'; //関数
 
 
-// プレイヤー側インスタンス格納用
-$humans = array();
-$humans[] = new Human('村人',Gender::MAN,100,40,120);
-$humans[] = new Human('勇者',Gender::WOMAN,1000,100,300);
+//POST送信
+// ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+if(!empty($_POST)){
+    debug('POST送信開始');
+    $attackFlg = (!empty($_POST['attack'])) ? true : false;
+    $startFlg = (!empty($_POST['start'])) ? true : false;
+    $escapeFlg = (!empty($_POST['escape'])) ? true : false;
+    debug('ーーーーーーーーーーーーーーーーーーーー');
+    debug('atatckFlg:'.$attackFlg);
+    debug('startFlg:'.$startFlg);
+    debug('escapeFlg:'.$escapeFlg);
+    debug('POST送信');
+    debug(print_r($_POST,true));
+    debug('セッション情報を表示');
+    debug(print_r($_SESSION,true));
+    debug('ーーーーーーーーーーーーーーーーーーーー');
 
-// エネミー側インスタンス格納用
-$Monster = array();
-$monsters[] = new Monster('フランケン',100,'img/monster01.png',20,40);
-$monsters[] = new MagicMonster('フランケンNEO',200,'img/monster02.png',20,40,mt_rand(50,100));
-$monsters[] = new Monster('ドラキュリー',100,'img/monster03.png',20,40);
-$monsters[] = new Monster('ドラキュラ伯爵',100,'img/monster04.png',20,40);
-$monsters[] = new Monster('スカルフェイス',100,'img/monster05.png',20,40);
-$monsters[] = new Monster('毒ハンド',100,'img/monster06.png',20,40);
-$monsters[] = new Monster('沼ハンド',100,'img/monster07.png',20,40);
-$monsters[] = new Monster('血のハンド',100,'img/monster08.png',20,40);
+    if($startFlg){
+        //ゲームスタート又はリセット
+        History::set(MSG11);
+        init();
+    }else if($attackFlg){
+        //攻撃するを選択した場合
 
+        //プレイヤー側の攻撃
+        History::set($_SESSION['human']->getName().MSG12);
+        $_SESSION['human']->attack($_SESSION['monster']);
+        $_SESSION['monster']->sayCry();
+
+        //モンスターの攻撃
+        History::set($_SESSION['monster']->getName().MSG12);
+        $_SESSION['monster']->attack($_SESSION['human']);
+        $_SESSION['human']->sayCry();
+        
+        //モンスター側のHPが0以下なら、次のモンスターをリスポーン
+        if($_SESSION['monster']->getHp() <= 0) {
+            History::set($_SESSION['monster']->getName().MSG13);
+            createMonster();
+            ++$_SESSION['knockDownCount'];
+        }
+        //プレイヤー側のHPが0以下でゲームオーバー
+        if($_SESSION['human']->getHp() <= 0) gameOver();
+  
+      }else if($escapeFlg){
+          //逃げた場合
+          History::set(MSG14);
+          createMonster();
+      }
+  
+    $_POST = array();
+  }
+  
 ?>
 
 
@@ -28,62 +65,10 @@ $monsters[] = new Monster('血のハンド',100,'img/monster08.png',20,40);
 <head>
     <meta charset="UTF-8">
     <title>Objective</title>
-    <style>
-    	body{
-	    	margin: 50px auto;
-	    	padding: 0 150px;
-	    	width: 25%;
-	    	background: #fbfbfa;
-        color: white;
-    	}
-    	h1{ color: white; font-size: 20px; text-align: center;}
-      h2{ color: white; font-size: 16px; text-align: center;}
-    	form{
-	    	overflow: hidden;
-    	}
-    	input[type="text"]{
-    		color: #545454;
-	    	height: 60px;
-	    	width: 100%;
-	    	padding: 5px 10px;
-	    	font-size: 16px;
-	    	display: block;
-	    	margin-bottom: 10px;
-	    	box-sizing: border-box;
-    	}
-      input[type="password"]{
-    		color: #545454;
-	    	height: 60px;
-	    	width: 100%;
-	    	padding: 5px 10px;
-	    	font-size: 16px;
-	    	display: block;
-	    	margin-bottom: 10px;
-	    	box-sizing: border-box;
-    	}
-    	input[type="submit"]{
-	    	border: none;
-	    	padding: 15px 30px;
-	    	margin-bottom: 15px;
-	    	background: black;
-	    	color: white;
-	    	float: right;
-    	}
-    	input[type="submit"]:hover{
-	    	background: #3d3938;
-	    	cursor: pointer;
-    	}
-    	a{
- color: #545454;
-	    	display: block;
-    	}
-    	a:hover{
-	    	text-decoration: none;
-    	}
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <h1 style="text-align:center; color:#333; ">ドラ◯エの的な」</h1>
+    <h1 style="text-align:center; color:#333; ">オブジェクト指向の練習</h1>
     <div style="background:black; padding:15px; position: relative;">
        <?php if(empty($_SESSION)){ ?>
         <h2 style="margin-top:60px">GAME START ?</h2>
