@@ -1,18 +1,17 @@
 <?php
-
 require 'dqClass.php'; //クラスファイル
 require 'instance.php'; //インスタンス生成
 require 'message.php'; //定型文
 require 'function.php'; //関数
 
-
-//POST送信
+//POST送信(ゲーム制御)
 // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 if(!empty($_POST)){
     debug('POST送信開始');
     $attackFlg = (!empty($_POST['attack'])) ? true : false;
     $startFlg = (!empty($_POST['start'])) ? true : false;
     $escapeFlg = (!empty($_POST['escape'])) ? true : false;
+    $restartFlg = (!empty($_POST['restart'])) ? true : false;
     debug('ーーーーーーーーーーーーーーーーーーーー');
     debug('atatckFlg:'.$attackFlg);
     debug('startFlg:'.$startFlg);
@@ -24,7 +23,7 @@ if(!empty($_POST)){
     debug('ーーーーーーーーーーーーーーーーーーーー');
 
     if($startFlg){
-        //ゲームスタート又はリセット
+        //ゲームスタート
         History::set(MSG11);
         init();
     }else if($attackFlg){
@@ -53,13 +52,15 @@ if(!empty($_POST)){
           //逃げた場合
           History::set(MSG14);
           createMonster();
+      }else if($restartFlg){
+          //リスタート
+          gameOver();
       }
   
     $_POST = array();
   }
   
 ?>
-
 
 <!DOCTYPE html>
 <head>
@@ -68,28 +69,28 @@ if(!empty($_POST)){
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <h1 style="text-align:center; color:#333; ">オブジェクト指向の練習</h1>
-    <div style="background:black; padding:15px; position: relative;">
+    <h1 class="title">オブジェクト指向の練習</h1>
+    <div class="wrap">
        <?php if(empty($_SESSION)){ ?>
-        <h2 style="margin-top:60px">GAME START ?</h2>
+        <h2 class="start">GAME START ?</h2>
         <form action="" method="post">
             <input type="submit" name="start" value="▶︎はじめる">
         </form>
        <?php }else{ ?>
         <h2><?php echo $_SESSION['monster']->getName().MSG09; ?></h2>
-        <div style="height: 170px; ">
-            <img src="<?php echo $_SESSION['monster']->getImg(); ?>" style="width:120px; height:auto; margin:40px auto 0 auto; display:block;">
+        <div class="name-monster">
+            <img src="<?php echo $_SESSION['monster']->getImg(); ?>">
         </div>
-        <p style="font-size:14px; text-align:left;">モンスターのHP：<?php echo $_SESSION['monster']->getHp(); ?></p>
+        <p class="hp-monster">モンスターのHP：<?php echo $_SESSION['monster']->getHp(); ?></p>
         <p>倒したモンスターの数：<?php echo $_SESSION['knockDownCount']; ?></p>
         <p><?php echo $_SESSION['human']->getName(); ?>の残りHP：<?php echo $_SESSION['human']->getHp(); ?></p>
         <form action="" method="post">
             <input type="submit" name="attack" value="▶︎攻撃する">
             <input type="submit" name="escape" value="▶︎逃げる">
-            <input type="submit" name="start" value="▶︎ゲームリスタート">
+            <input type="submit" name="restart" value="▶︎ゲームリスタート">
         </form>
        <?php } ?>
-       <div style="position:absolute; right:-350px; top:0; color:black; width: 300px;">
+       <div class="history">
          <p><?php echo (!empty($_SESSION['history'])) ? $_SESSION['history'] : ''; ?></p>
        </div>
     </div>

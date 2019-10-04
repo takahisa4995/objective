@@ -43,9 +43,43 @@ input[type="submit"]:hover{
     cursor: pointer;
 }
 a{
- color: #545454;
+    color: #545454;
     display: block;
 }
 a:hover{
     text-decoration: none;
+}
+
+.title{
+    text-align:center; 
+    color:#333;
+}
+.wrap{
+    background:black; 
+    padding:15px; 
+    position: relative;
+}
+.start{
+    margin-top: 60px;
+}
+.name-monster{
+    height: 170px;
+}
+.name-monster img{
+    width:120px; 
+    height:auto;
+    margin:40px auto 0 auto; 
+    display:block;
+}
+.hp-monster{
+    font-size:14px; 
+    text-align:left;
+}
+
+.history{
+    position:absolute; 
+    right:-350px; 
+    top:0; 
+    color:black; 
+    width: 300px;
 }
