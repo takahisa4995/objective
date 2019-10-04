@@ -1,3 +1,5 @@
+/* 共通設定 */
+/* ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー */
 body{
     margin: 50px auto;
     padding: 0 150px;
@@ -50,6 +52,8 @@ a:hover{
     text-decoration: none;
 }
 
+
+/* ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー */
 .title{
     text-align:center; 
     color:#333;
