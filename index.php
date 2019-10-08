@@ -8,19 +8,16 @@ require 'function.php'; //関数
 // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 if(!empty($_POST)){
     debug('POST送信開始');
-    $attackFlg = (!empty($_POST['attack'])) ? true : false;
-    $startFlg = (!empty($_POST['start'])) ? true : false;
-    $escapeFlg = (!empty($_POST['escape'])) ? true : false;
+    $attackFlg  = (!empty($_POST['attack']))  ? true : false;
+    $startFlg   = (!empty($_POST['start']))   ? true : false;
+    $escapeFlg  = (!empty($_POST['escape']))  ? true : false;
     $restartFlg = (!empty($_POST['restart'])) ? true : false;
-    debug('ーーーーーーーーーーーーーーーーーーーー');
-    debug('atatckFlg:'.$attackFlg);
-    debug('startFlg:'.$startFlg);
-    debug('escapeFlg:'.$escapeFlg);
-    debug('POST送信');
-    debug(print_r($_POST,true));
-    debug('セッション情報を表示');
-    debug(print_r($_SESSION,true));
-    debug('ーーーーーーーーーーーーーーーーーーーー');
+    // debug('ーーーーーーーーーーーーーーーーーーーー');
+    // debug('POST送信');
+    // debug(print_r($_POST,true));
+    // debug('セッション情報を表示');
+    // debug(print_r($_SESSION,true));
+    // debug('ーーーーーーーーーーーーーーーーーーーー');
 
     if($startFlg){
         //ゲームスタート
@@ -46,7 +43,8 @@ if(!empty($_POST)){
             ++$_SESSION['knockDownCount'];
         }
         //プレイヤー側のHPが0以下でゲームオーバー
-        if($_SESSION['human']->getHp() <= 0) gameOver();
+        if($_SESSION['human']->getHp() <= 0) $_SESSION['gamesetFlg'] = true;
+        // gameOver();
   
       }else if($escapeFlg){
           //逃げた場合
@@ -76,7 +74,7 @@ if(!empty($_POST)){
         <form action="" method="post">
             <input type="submit" name="start" value="▶︎はじめる">
         </form>
-       <?php }else{ ?>
+       <?php }else if(empty($_SESSION['gamesetFlg'])){ ?>
         <h2><?php echo $_SESSION['monster']->getName().MSG09; ?></h2>
         <div class="name-monster">
             <img src="<?php echo $_SESSION['monster']->getImg(); ?>">
@@ -89,6 +87,10 @@ if(!empty($_POST)){
             <input type="submit" name="escape" value="▶︎逃げる">
             <input type="submit" name="restart" value="▶︎ゲームリスタート">
         </form>
+       <?php }else if($_SESSION['gamesetFlg'] === true){ ?>
+        <!-- リザルト画面を表示 -->
+        <h1>Result</h1>
+
        <?php } ?>
        <div class="history">
          <p><?php echo (!empty($_SESSION['history'])) ? $_SESSION['history'] : ''; ?></p>
