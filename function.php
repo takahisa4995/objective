@@ -15,8 +15,9 @@ function debug($str){
 function createMonster(){
   global $monsters;
   debug('$monsters変数：');
-  debug(print_r($mosnters,true));
-  $_SESSION['monster'] = $monsters[mt_rand(0,7)];
+  debug(print_r($monsters,true));
+  $_SESSION['monster'] = $monsters[mt_rand(0,1)];
+  // $_SESSION['monster'] = $monsters[mt_rand(0,count($monsters) - 1)];
   debug(print_r($_SESSION,true));
   History::set($_SESSION['monster']->getName().MSG09);
 
@@ -24,6 +25,7 @@ function createMonster(){
 function createHuman(){
   global $humans;
   $_SESSION['human'] = $humans[mt_rand(0,1)];
+  // $_SESSION['human'] = $humans[mt_rand(0,count($humans)-1)];
 }
 
 function init(){

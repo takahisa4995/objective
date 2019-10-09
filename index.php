@@ -1,9 +1,9 @@
 <?php
+// session_destroy();
+require 'function.php'; //関数
+require 'message.php'; //定型文
 require 'dqClass.php'; //クラスファイル
 require 'instance.php'; //インスタンス生成
-require 'message.php'; //定型文
-require 'function.php'; //関数
-
 //POST送信(ゲーム制御)
 // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 if(!empty($_POST)){
@@ -12,12 +12,13 @@ if(!empty($_POST)){
     $startFlg   = (!empty($_POST['start']))   ? true : false;
     $escapeFlg  = (!empty($_POST['escape']))  ? true : false;
     $restartFlg = (!empty($_POST['restart'])) ? true : false;
-    // debug('ーーーーーーーーーーーーーーーーーーーー');
-    // debug('POST送信');
-    // debug(print_r($_POST,true));
-    // debug('セッション情報を表示');
-    // debug(print_r($_SESSION,true));
-    // debug('ーーーーーーーーーーーーーーーーーーーー');
+
+    debug('ーーーーーーーーーーーーーーーーーーーー');
+    debug('POST内容');
+    debug(print_r($_POST,true));
+    debug('セッション情報を表示');
+    debug(print_r($_SESSION,true));
+    debug('ーーーーーーーーーーーーーーーーーーーー');
 
     if($startFlg){
         //ゲームスタート
@@ -57,7 +58,6 @@ if(!empty($_POST)){
   
     $_POST = array();
   }
-  
 ?>
 
 <!DOCTYPE html>
@@ -71,10 +71,11 @@ if(!empty($_POST)){
     <div class="wrap">
        <?php if(empty($_SESSION)){ ?>
         <h2 class="start">GAME START ?</h2>
-        <form action="" method="post">
+        <form action="index.php" method="post">
             <input type="submit" name="start" value="▶︎はじめる">
         </form>
        <?php }else if(empty($_SESSION['gamesetFlg'])){ ?>
+
         <h2><?php echo $_SESSION['monster']->getName().MSG09; ?></h2>
         <div class="name-monster">
             <img src="<?php echo $_SESSION['monster']->getImg(); ?>">
@@ -82,7 +83,7 @@ if(!empty($_POST)){
         <p class="hp-monster">モンスターのHP：<?php echo $_SESSION['monster']->getHp(); ?></p>
         <p>倒したモンスターの数：<?php echo $_SESSION['knockDownCount']; ?></p>
         <p><?php echo $_SESSION['human']->getName(); ?>の残りHP：<?php echo $_SESSION['human']->getHp(); ?></p>
-        <form action="" method="post">
+        <form class="action" action="" method="post">
             <input type="submit" name="attack" value="▶︎攻撃する">
             <input type="submit" name="escape" value="▶︎逃げる">
             <input type="submit" name="restart" value="▶︎ゲームリスタート">
@@ -90,6 +91,10 @@ if(!empty($_POST)){
        <?php }else if($_SESSION['gamesetFlg'] === true){ ?>
         <!-- リザルト画面を表示 -->
         <h1>Result</h1>
+        <p>倒したモンスターの数：<?php echo $_SESSION['knockDownCount']; ?></p>
+        <form class="action" action="" method="post">
+            <input type="submit" name="restart" value="▶︎ゲームリスタート">
+        </form>
 
        <?php } ?>
        <div class="history">
