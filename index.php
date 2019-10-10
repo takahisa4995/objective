@@ -1,7 +1,7 @@
 <?php
 
 require 'function.php'; //関数
-// require 'dqClass.php'; //クラスファイル
+// require 'draqueClass.php'; //クラスファイル
 
 // 性別クラス
 class Gender{
@@ -11,13 +11,14 @@ class Gender{
 }
 // 生き物クラス(抽象クラス)
 abstract class Creature{
+    //基本ステータス
     protected $name;
     protected $hp;
     protected $mp;
     protected $atk;
     protected $def;
     protected $spd;
- 
+
     abstract public function sayCry();
     
     public function setName($str){
@@ -67,7 +68,7 @@ abstract class Creature{
         if(!mt_rand(0,9)){
             //10%で会心の一撃
             // 実ダメージ = 攻撃力 * (95% ~ 105%)
-            $damege = (int)( $this->atk * (rand(0.95,1.05)));
+            $damege = round( $this->atk * (rand(0.95,1.05)));
             History::set($this->getName() . MSG01);
         }
         
@@ -130,8 +131,13 @@ class Monster extends Creature{
     }
 }
 
+interface HistoryInterface{
+    public static function set($str);
+    public static function clear();
+}
+
 // 履歴管理クラス
-class History{
+class History implements HistoryInterface{
     public static function set($str){
         if(empty($_SESSION['history'])) $_SESSION['history'] = '';
         $_SESSION['history'] .= $str .'<br>';
