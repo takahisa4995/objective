@@ -90,6 +90,10 @@ if(!empty($_POST)){
        <?php }else if($_SESSION['gamesetFlg'] === true){ ?>
         <!-- リザルト画面を表示 -->
         <h1>Result</h1>
+        <p>倒したモンスターの数：<?php echo $_SESSION['knockDownCount']; ?></p>
+        <form action="" method="post">
+            <input type="submit" name="restart" value="▶︎ゲームリスタート">
+        </form>
 
        <?php } ?>
        <div class="history">
