@@ -1,6 +1,6 @@
 <?php
 
-require_once 'init.php'; //セッション、デバッグ設定
+require 'function.php'; //関数
 // require 'dqClass.php'; //クラスファイル
 
 // 性別クラス
@@ -54,14 +54,16 @@ abstract class Creature{
         // ダメージ幅   ＝ (基本ダメージ / 16) + 1
         // 実ダメージ   = 基本ダメージ ± ダメージ幅 
         // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
-        $base_num = (($this->atk) * 2) - ($targetObj->getDef() * 4);
+        $base_num = (($this->atk) / 2) - ($targetObj->getDef() / 4);
         // 基本ダメージがマイナスの場合は0に修正
-        $base_num = ($base_num < 0) ? 0 : $damege;
+        $base_num = ($base_num < 0) ? 0 : $base_num;
         $rand_num = ($base_num / 16) + 1;
-        $damege = (int)($base_num + mt_rand(((-1) * $rand_num),$rand_num));
-        debug('$base_num =' . $base_num);
-        debug('$rand_num =' . $rand_num);
-        debug('$damege =' . $damege);
+        $damege = round($base_num + mt_rand(((-1) * $rand_num),$rand_num));
+        // debug('攻撃力：'.$this->atk);
+        // debug('防御力：'.$targetObj->getDef());
+        // debug('$base_num =' . $base_num);
+        // debug('$rand_num =' . $rand_num);
+        // debug('$damege =' . $damege);
         if(!mt_rand(0,9)){
             //10%で会心の一撃
             // 実ダメージ = 攻撃力 * (95% ~ 105%)
@@ -141,7 +143,6 @@ class History{
 
 require 'instance.php'; //インスタンス生成
 require 'message.php'; //定型文
-require 'function.php'; //関数
 
 //POST送信(ゲーム制御)
 // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
@@ -182,8 +183,10 @@ if(!empty($_POST)){
             ++$_SESSION['knockDownCount'];
         }
         //プレイヤー側のHPが0以下でゲームオーバー
-        if($_SESSION['human']->getHp() <= 0) $_SESSION['gamesetFlg'] = true;
-        // gameOver();
+        if($_SESSION['human']->getHp() <= 0) {
+          $_SESSION['gamesetFlg'] = true;
+          gameOver();
+        }
   
       }else if($escapeFlg){
           //逃げた場合
@@ -207,7 +210,7 @@ if(!empty($_POST)){
 </head>
 <body>
     <h1 class="title">オブジェクト指向の練習</h1>
-    <div class="wrap">
+    <div class="wrap <?php if(!empty($battleFlg)) echo 'battle' ?>">
        <?php if(empty($_SESSION)){ ?>
         <h2 class="start">GAME START ?</h2>
         <form action="" method="post">

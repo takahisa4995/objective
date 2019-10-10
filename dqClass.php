@@ -4,7 +4,7 @@
 // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 
 // 性別クラス
-class Gender{
+class Sex{
     const MAN = 1;
     const WOMAN = 2;
     const OTHER = 3;
@@ -73,27 +73,27 @@ abstract class Creature{
 }
 //人(プレイヤー側)クラス
 class Human extends Creature{
-    protected $gender;
-    public function __construct($name,$gender,$hp,$mp,$atk,$def,$spd){
+    protected $Sex;
+    public function __construct($name,$Sex,$hp,$mp,$atk,$def,$spd){
         $this->name = $name;
-        $this->gender =$gender;
+        $this->Sex =$Sex;
         $this->hp = $hp;
         $this->mp = $mp;
         $this->atk = $atk;
         $this->def = $def;
         $this->spd = $spd;
     }
-    public function setGender($num){
-        $this->gender = $num;
+    public function setSex($num){
+        $this->Sex = $num;
     }
     public function sayCry(){
         History::set($this->name . MSG03);
-        switch($this->gender){
-            case Gender::MAN :
+        switch($this->Sex){
+            case Sex::MAN :
             History::set(MSG04);
             break;
 
-            case Gender::WOMAN  :
+            case Sex::WOMAN  :
             History::set(MSG05);
             break;
 

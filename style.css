@@ -63,6 +63,9 @@ a:hover{
     padding:15px; 
     position: relative;
 }
+.wrap.battle{
+    background: red;
+}
 .start{
     margin-top: 60px;
 }
